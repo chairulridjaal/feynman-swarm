@@ -127,9 +127,7 @@ fn read_run(env: &Env, run_id: u64) -> ResearchRun {
 }
 
 fn write_run(env: &Env, run: &ResearchRun) {
-    env.storage()
-        .persistent()
-        .set(&DataKey::Run(run.id), run);
+    env.storage().persistent().set(&DataKey::Run(run.id), run);
 }
 
 fn require_owner(env: &Env, run: &ResearchRun, owner: &Address) {
@@ -201,8 +199,10 @@ impl FeynmanSwarm {
         run.status = RunStatus::Funded;
         write_run(&env, &run);
 
-        env.events()
-            .publish((symbol_short!("run"), symbol_short!("fund")), (run_id, amount));
+        env.events().publish(
+            (symbol_short!("run"), symbol_short!("fund")),
+            (run_id, amount),
+        );
     }
 
     pub fn register_agent(
@@ -276,8 +276,10 @@ impl FeynmanSwarm {
         run.status = RunStatus::Researching;
         write_run(&env, &run);
         env.storage().persistent().set(&artifact_key, &artifact);
-        env.events()
-            .publish((symbol_short!("art"), symbol_short!("submit")), (run_id, task_id, agent));
+        env.events().publish(
+            (symbol_short!("art"), symbol_short!("submit")),
+            (run_id, task_id, agent),
+        );
     }
 
     pub fn approve_artifact(
@@ -329,11 +331,7 @@ impl FeynmanSwarm {
         env.storage().persistent().set(&agent_key, &agent);
 
         let token = token::TokenClient::new(&env, &run.token);
-        token.transfer(
-            &env.current_contract_address(),
-            &artifact.agent,
-            &reward,
-        );
+        token.transfer(&env.current_contract_address(), &artifact.agent, &reward);
 
         env.events().publish(
             (symbol_short!("art"), symbol_short!("pay")),
@@ -374,8 +372,10 @@ impl FeynmanSwarm {
         env.storage()
             .persistent()
             .set(&DataKey::Rejection(run_id, task_id), &rejection);
-        env.events()
-            .publish((symbol_short!("art"), symbol_short!("reject")), (run_id, task_id));
+        env.events().publish(
+            (symbol_short!("art"), symbol_short!("reject")),
+            (run_id, task_id),
+        );
     }
 
     pub fn finalize_run(
@@ -427,8 +427,10 @@ impl FeynmanSwarm {
         let token = token::TokenClient::new(&env, &run.token);
         token.transfer(&env.current_contract_address(), &run.owner, &refund);
 
-        env.events()
-            .publish((symbol_short!("run"), symbol_short!("refund")), (run_id, refund));
+        env.events().publish(
+            (symbol_short!("run"), symbol_short!("refund")),
+            (run_id, refund),
+        );
         refund
     }
 

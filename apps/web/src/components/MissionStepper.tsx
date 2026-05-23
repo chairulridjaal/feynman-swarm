@@ -1,73 +1,54 @@
-import { Check } from "lucide-react";
-import type { MissionPhase } from "../types";
+import { Lightbulb, Wallet, Users, ShieldCheck, User, FileText, Check } from "lucide-react";
 
 interface MissionStepperProps {
-  phase: MissionPhase;
+  activeStep: number;
+  maxStep: number;
+  onStepClick: (step: number) => void;
 }
 
-export function MissionStepper({ phase }: MissionStepperProps) {
+export function MissionStepper({ activeStep, maxStep, onStepClick }: MissionStepperProps) {
   const steps = [
-    {
-      id: "create",
-      label: "Create mission",
-      description: "Define question and budget",
-      isCompleted: phase !== "draft",
-      isActive: phase === "draft"
-    },
-    {
-      id: "fund",
-      label: "Fund with XLM",
-      description: "Commit escrow budget",
-      isCompleted: !["draft", "created"].includes(phase),
-      isActive: phase === "created"
-    },
-    {
-      id: "research",
-      label: "Agents research",
-      description: "Swarm gathers artifacts",
-      isCompleted: !["draft", "created", "funded", "running"].includes(phase),
-      isActive: ["funded", "running"].includes(phase)
-    },
-    {
-      id: "verify",
-      label: "Verify evidence",
-      description: "Approve or reject claims",
-      isCompleted: phase === "finalized",
-      isActive: phase === "verifying"
-    },
-    {
-      id: "complete",
-      label: "Final report",
-      description: "Invoice and refund ready",
-      isCompleted: phase === "finalized",
-      isActive: phase === "finalized"
-    }
+    { id: 1, label: "Create mission", icon: Lightbulb },
+    { id: 2, label: "Fund with XLM", icon: Wallet },
+    { id: 3, label: "Agents research", icon: Users },
+    { id: 4, label: "Verify evidence", icon: ShieldCheck },
+    { id: 5, label: "Pay contributors", icon: User },
+    { id: 6, label: "Final report", icon: FileText },
   ];
 
   return (
-    <div className="mission-stepper" aria-label="Research stepper workflow">
+    <div className="mission-stepper-container" aria-label="Research stepper workflow">
+      <div className="stepper-track-line" />
       <div className="stepper-track">
-        {steps.map((step, index) => {
-          const isLast = index === steps.length - 1;
-          const statusClass = step.isCompleted ? "completed" : step.isActive ? "active" : "upcoming";
+        {steps.map((step) => {
+          const isCompleted = step.id < activeStep || step.id <= maxStep;
+          const isActive = step.id === activeStep;
+          const isLocked = step.id > maxStep;
+          const IconComponent = step.icon;
 
           return (
-            <div key={step.id} className={`stepper-step ${statusClass}`}>
-              <div className="step-marker-container">
+            <button
+              key={step.id}
+              className={`stepper-step ${isActive ? "active" : ""} ${
+                isCompleted && !isActive ? "completed" : ""
+              } ${isLocked ? "locked" : ""}`}
+              onClick={() => !isLocked && onStepClick(step.id)}
+              disabled={isLocked}
+            >
+              <div className="step-circle-container">
                 <div className="step-circle">
-                  {step.isCompleted && step.id !== "complete" ? (
-                    <Check size={14} className="icon-check" />
+                  {step.id < activeStep && !isActive ? (
+                    <Check size={12} className="icon-check" />
                   ) : (
-                    <span>{index + 1}</span>
+                    <span>{step.id}</span>
                   )}
                 </div>
-                {!isLast && <div className="step-line" />}
               </div>
               <div className="step-content">
-                <div className="step-label">{step.label}</div>
-                <div className="step-description">{step.description}</div>
+                <IconComponent size={14} className="step-icon" />
+                <span className="step-label">{step.label}</span>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

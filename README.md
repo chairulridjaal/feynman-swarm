@@ -1,10 +1,37 @@
 # Feynman Swarm
 
-Feynman Swarm is an XLM-powered AI research economy on Stellar.
+## Project Title
+
+**Feynman Swarm** - an XLM-powered AI research economy on Stellar.
+
+## Project Description
 
 Users fund a research mission with testnet XLM, specialized agents produce evidence artifacts, a verifier approves or rejects each artifact, and the Soroban contract releases payment only for accepted work.
 
 > Fund questions. Pay evidence. Verify knowledge.
+
+The demo combines a Soroban escrow contract, a React research command center, a deterministic workshop-safe agent simulator, and an optional live AI bridge powered by GPT 5.4 Medium through the LB Responses API.
+
+## Project Vision
+
+Feynman Swarm imagines research as a transparent marketplace instead of a black-box chat session. Questions receive budgets, agents compete to produce useful evidence, verifiers reject weak claims, and contributors are paid only when their artifacts survive review.
+
+The long-term vision is a public knowledge economy where schools, researchers, DAOs, civic teams, and builders can fund questions and see exactly which evidence earned money.
+
+## Feature List
+
+- Create a research mission from a big question, budget, depth, and output type.
+- Fund the mission with testnet-style XLM escrow.
+- Simulate specialized research agents: Planner, Paper Scout, Web Scout, Repo Scout, Verifier, and Writer.
+- Submit evidence cards with claims, sources, confidence, artifact hashes, URIs, and proposed rewards.
+- Approve or reject artifacts through verifier logic.
+- Release XLM-style payouts only for accepted artifacts.
+- Refund unused mission budget.
+- Generate a final report with executive summary, recommendation, confidence, evidence table, rejected claims, and cost breakdown.
+- Show a transparent research invoice with total budget, spent XLM, refunded XLM, per-agent payouts, rejected artifacts, and cost per accepted claim.
+- Connect Freighter when available, with deterministic demo wallet fallback.
+- Run an optional live AI research pass through the local `apps/api` LB bridge.
+- Keep long research text off-chain while storing compact hashes, URIs, status, scores, and payout amounts.
 
 ## Why Stellar/XLM?
 
@@ -62,6 +89,30 @@ For native XLM on testnet, pass the native Stellar Asset Contract address as the
 
 ```powershell
 stellar contract id asset --network testnet --asset native
+```
+
+## Smart Contract ID
+
+The workshop deployment is live on Stellar Testnet:
+
+```text
+Contract package: feynman-swarm
+Network: Stellar Testnet
+Contract ID: CCB3SMUCPQ76RUDNBYUBOWLXB5I5VNJY6OATTINSBLJ6KPURTN2RWDS7
+WASM hash: 2d7c37bb8fd0a29731907301a9f1ee8ff96a8af9ac7389b9793db4e8e5b195db
+Deployer: GBYDQSUWEMSS4TS2ATQJYAC5GI7CVHJ7XCYXJ3UJPP46VDRN4BHHJENM
+```
+
+Deployment links:
+
+- WASM upload: https://stellar.expert/explorer/testnet/tx/eb1f986a49aad087ac6b08d753e1d0ad21dbaf7c6e057526667afad62b5d6840
+- Contract deploy: https://stellar.expert/explorer/testnet/tx/bdb0475424134bbfb2b13d3a7bc1d62b0ea36c208d7f3dafd106c69f30bf2a3a
+- Lab view: https://lab.stellar.org/r/testnet/contract/CCB3SMUCPQ76RUDNBYUBOWLXB5I5VNJY6OATTINSBLJ6KPURTN2RWDS7
+
+The frontend reads the contract ID from:
+
+```powershell
+Copy-Item apps\web\.env.example apps\web\.env
 ```
 
 ## Frontend Flow
@@ -143,17 +194,17 @@ Demo mode mirrors contract semantics:
 
 When `apps/api` is running, click **Run Live AI Pass** to send the mission ledger to the workshop LB model provider using GPT 5.4 Medium. If the API is unavailable, the deterministic report remains usable.
 
-Set `VITE_FEYNMAN_SWARM_CONTRACT_ID` in `apps/web/.env` after deploying a real contract. The adapter is intentionally conservative until generated bindings are added.
+Set `VITE_FEYNMAN_SWARM_CONTRACT_ID` in `apps/web/.env` to point at a different deployed contract. The adapter is intentionally conservative until generated bindings are added.
 
 ## Demo Script
 
-1. “Feynman Swarm turns a question into a research market: fund the mission, pay evidence, reject weak claims.”
-2. Show the default question: “What sustainability project should a rural Indonesian school prioritize: rooftop solar, smart irrigation, or rainwater harvesting?”
+1. "Feynman Swarm turns a question into a research market: fund the mission, pay evidence, reject weak claims."
+2. Show the default question: "What sustainability project should a rural Indonesian school prioritize: rooftop solar, smart irrigation, or rainwater harvesting?"
 3. Create the mission with a 24 XLM budget.
 4. Use demo wallet or connect Freighter on Testnet.
 5. Fund the mission.
 6. Start the swarm and let the agent nodes submit artifacts.
-7. Run the verifier. Point out that supported rainwater, solar, irrigation, and synthesis artifacts are paid, while the unsupported “solar always wins” claim is rejected.
+7. Run the verifier. Point out that supported rainwater, solar, irrigation, and synthesis artifacts are paid, while the unsupported "solar always wins" claim is rejected.
 8. Generate the final report. The recommendation prioritizes rainwater harvesting first, then solar, then smart irrigation as a learning extension.
 9. Show the invoice: budget, spent XLM, refunded XLM, payouts per agent, rejected artifacts, and cost per accepted claim.
 10. Refund unused budget.
@@ -170,8 +221,8 @@ Implementation choices were based on current Stellar docs and primary project re
 
 ## Limitations
 
-- The web app currently uses a deterministic local swarm engine rather than live LLM/search calls.
-- The Soroban contract code is implemented, but Rust/Stellar CLI verification requires the local toolchain on PATH.
+- The web app uses a deterministic local swarm engine as the reliable default; the live AI pass depends on the workshop LB provider being available.
+- The Soroban contract is deployed on Stellar Testnet, but production dApp calls still need generated TypeScript bindings and signed transaction plumbing.
 - The frontend includes wallet detection and demo ledger semantics; production contract calls should be wired through generated TypeScript bindings after deployment.
 - Research artifacts use sample citations and IPFS-style URIs for demo clarity.
 - There is no dispute resolution, agent reputation, or multi-verifier staking yet.
