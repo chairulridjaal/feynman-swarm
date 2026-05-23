@@ -6,3 +6,5 @@ dist/
 .stellar/
 *.wasm
 *.tsbuildinfo
+test-results/
+playwright-report/

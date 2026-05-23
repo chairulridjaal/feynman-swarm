@@ -1,314 +1,120 @@
-import { 
-  FileText, Award, Sparkles, AlertTriangle, XCircle, DollarSign, ArrowRight, Download, Share2 
-} from "lucide-react";
-import type { FinalReportModel, MissionPhase } from "../types";
+import { Download, Share2, FileText, CheckCircle, ExternalLink, Link2, Zap } from "lucide-react";
+import type { FinalReportModel, MissionPhase, ResearchInvoice } from "../types";
+import { formatXlm } from "../lib/hash";
 
 interface FinalReportProps {
   report: FinalReportModel;
+  invoice: ResearchInvoice;
   phase: MissionPhase;
   onFinalize: () => void;
 }
 
-export function FinalReport({ report, phase, onFinalize }: FinalReportProps) {
-  const canFinalize = phase === "verifying";
-  const unlocked = phase === "finalized";
-
-  // Data to match Image 5 exactly
-  const keyEvidence = [
-    {
-      evidence: "Rainfall reliability",
-      shows: "4–5 month dry season; high inter-annual variability",
-      source: "BMKG (2020–2023)"
-    },
-    {
-      evidence: "Water demand",
-      shows: "≈8–12 m³/day for students, staff, sanitation, cleaning",
-      source: "WHO WASH & SNI 03-7065"
-    },
-    {
-      evidence: "Rainwater potential",
-      shows: "≈450–650 m²/year from 600 m² roof (0.75 runoff)",
-      source: "Tanks for Everything (2021)"
-    },
-    {
-      evidence: "Irrigation efficiency",
-      shows: "Smart drip cuts use 30–50% vs. conventional",
-      source: "FAO Irrigation Brief (2019)"
-    },
-    {
-      evidence: "Solar viability",
-      shows: "Payback 4–6 yrs with clear load profile & maintenance",
-      source: "IRENA (2022), Case studies"
-    }
-  ];
+export function FinalReport({ report, invoice }: FinalReportProps) {
+  const acceptedRows = report.evidenceRows.filter((row) => row.status === "approved" || row.status === "paid");
 
   return (
-    <div className="report-workspace fade-in font-sans">
+    <div className="split-pane-layout fade-in">
       
-      {/* Title Row with Buttons */}
-      <div className="agents-title-row">
-        <div className="title-block">
-          <div className="report-title-badge-row">
-            <h1>Final report</h1>
-            <span className="report-ready-badge bg-emerald-light text-emerald font-sans">
-              <span className="status-badge-dot bg-emerald" />
-              Report ready
-            </span>
+      {/* Left Pane: Document Viewer */}
+      <div className="pane-document">
+        
+        <div className="doc-header">
+          <div className="doc-title-group">
+            <span className="doc-kicker font-mono">FEYNMAN INTELLIGENCE MEMO</span>
+            <h1 className="doc-title">Final Analysis & Recommendation</h1>
           </div>
-          <p className="subtitle">Research complete. Review the findings and recommendations.</p>
+          
+          <div className="doc-actions">
+            <button className="btn-doc-action">
+              <Share2 size={14} /> Share
+            </button>
+            <button className="btn-doc-primary">
+              <Download size={14} /> Export PDF
+            </button>
+          </div>
         </div>
 
-        <div className="btn-toolbar">
-          <button className="btn btn-secondary btn-sm">
-            <Download size={14} className="btn-icon" />
-            Download PDF
-          </button>
-          <button className="btn-primary-mockup btn-sm" style={{ padding: "8px 16px" }}>
-            <Share2 size={14} className="btn-icon" />
-            Share Report
-          </button>
+        <div className="doc-body">
+          <section className="doc-section">
+            <h2 className="doc-h2">Executive Summary</h2>
+            <p className="doc-p">{report.executiveSummary}</p>
+          </section>
+
+          <section className="doc-section mt-32">
+            <div className="section-header-flex">
+              <h2 className="doc-h2">Primary Recommendation</h2>
+              <span className="badge-confidence bg-emerald-light text-emerald font-mono">
+                {Math.round(report.confidence * 100)}% Confidence Score
+              </span>
+            </div>
+            
+            <div className="recommendation-callout">
+              <Zap size={18} className="callout-icon text-amber" />
+              <div className="callout-content">
+                <p className="doc-p strong">{report.recommendation}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="doc-section mt-32">
+            <h2 className="doc-h2">Critical Uncertainty Drivers</h2>
+            <p className="doc-p">
+              Rainfall in dry years, maintenance behavior, procurement quality, and the limited scope of demo citations remain the main uncertainty drivers. 
+              The swarm flagged <strong>{report.rejectedClaims.length} sources</strong> as unreliable during the verification phase.
+            </p>
+          </section>
         </div>
       </div>
 
-      {/* Two Column Layout Grid */}
-      <div className="report-layout-grid mt-24">
+      {/* Right Pane: Citations & Escrow Panel */}
+      <div className="pane-sidebar">
         
-        {/* Left Column: Report content cards */}
-        <div className="report-main-column">
-          
-          {/* Executive Summary Card */}
-          <section className="setup-main-card">
-            <div className="card-inner-padding">
-              <div className="card-header-with-icon">
-                <div className="icon-wrapper bg-blue-light text-blue"><FileText size={16} /></div>
-                <h2 className="setup-section-title">Executive summary</h2>
-              </div>
-              <p className="report-body-text mt-12">
-                Water reliability is the binding constraint for the school. Rainfall is seasonal and storage is limited, causing periodic shortages that disrupt classes and hygiene. Among the options evaluated—rooftop solar, smart irrigation, and rainwater harvesting—interventions that secure water now deliver the highest impact per dollar.
-              </p>
-            </div>
-          </section>
-
-          {/* Recommendation Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <div className="card-header-with-icon-badge">
-                <div className="card-header-with-icon">
-                  <div className="icon-wrapper bg-blue-light text-blue"><Sparkles size={16} /></div>
-                  <h2 className="setup-section-title">Recommendation</h2>
+        <div className="sidebar-section">
+          <h3 className="sidebar-h3">Verified Evidence Sources</h3>
+          <div className="citation-list">
+            {acceptedRows.map((row, idx) => (
+              <div key={idx} className="citation-card">
+                <div className="citation-top">
+                  <span className="citation-num">{idx + 1}</span>
+                  <p className="citation-claim">{row.claim}</p>
                 </div>
-                <span className="primary-tag font-mono">Primary</span>
-              </div>
-
-              <div className="recommendation-memo-box mt-12">
-                <p className="rec-text-memo">
-                  Prioritize rainwater harvesting and smart irrigation to stabilize water supply and reduce waste. Add rooftop solar when there is a clear load profile and a maintenance plan in place.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Key Evidence Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <div className="card-header-with-icon">
-                <div className="icon-wrapper bg-blue-light text-blue"><Award size={16} /></div>
-                <h2 className="setup-section-title">Key evidence</h2>
-              </div>
-
-              <div className="evidence-table-wrapper mt-12">
-                <table className="evidence-custom-table font-sans">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "30%" }}>Evidence</th>
-                      <th style={{ width: "45%" }}>What it shows</th>
-                      <th style={{ width: "25%" }}>Source</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {keyEvidence.map((row, idx) => (
-                      <tr key={idx} className="evidence-table-row">
-                        <td>
-                          <div className="evidence-cell-name">
-                            <span className="bullet-dot-blue" />
-                            <strong>{row.evidence}</strong>
-                          </div>
-                        </td>
-                        <td className="text-dark-sub font-sans">{row.shows}</td>
-                        <td className="text-muted-custom font-mono">{row.source}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          {/* Uncertainty Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <div className="uncertainty-flex-row">
-                <div className="uncertainty-left">
-                  <div className="card-header-with-icon">
-                    <div className="icon-wrapper bg-blue-light text-blue"><AlertTriangle size={16} /></div>
-                    <h2 className="setup-section-title">Uncertainty</h2>
+                <div className="citation-bottom">
+                  <div className="citation-source">
+                    <Link2 size={12} className="text-muted" />
+                    <span className="truncate">{row.source}</span>
                   </div>
-                  <p className="report-body-text mt-12">
-                    Rainfall in dry years, future tariff or fuel prices, behavior change for maintenance, and procurement/installation quality.
-                  </p>
-                </div>
-                
-                <div className="uncertainty-right">
-                  <div className="confidence-pill bg-amber-light text-amber border-amber-light">
-                    <span className="status-badge-dot bg-amber" />
-                    Medium Confidence
-                  </div>
+                  <span className="citation-cost font-mono">paid {formatXlm(row.costXlm)}</span>
                 </div>
               </div>
-            </div>
-          </section>
-
-          {/* Rejected Claims Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <div className="card-header-with-icon">
-                <div className="icon-wrapper bg-rose-light text-rose"><XCircle size={16} /></div>
-                <h2 className="setup-section-title">Rejected claims</h2>
-              </div>
-              <ul className="rejected-claims-bullets mt-12 font-sans">
-                <li>
-                  <span className="bullet-dash-rose" />
-                  <p>Rooftop solar alone will solve reliability—false without storage and O&M plan.</p>
-                </li>
-                <li>
-                  <span className="bullet-dash-rose" />
-                  <p>Smart irrigation without a reliable source—limited benefit.</p>
-                </li>
-              </ul>
-            </div>
-          </section>
-
-          {/* Budget Summary Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <div className="card-header-with-icon">
-                <div className="icon-wrapper bg-blue-light text-blue"><DollarSign size={16} /></div>
-                <h2 className="setup-section-title">Budget summary</h2>
-              </div>
-              <p className="report-body-text mt-12 font-sans">
-                Total budget allocated: <strong>100 XLM (~$33.60 USD)</strong>. Funds were allocated across agents, data sources, and verification.
-              </p>
-            </div>
-          </section>
+            ))}
+          </div>
         </div>
 
-        {/* Right Column: Assessment Side Card details */}
-        <div className="report-sidebar-column">
+        <div className="sidebar-section mt-32">
+          <h3 className="sidebar-h3">Escrow Ledger</h3>
           
-          {/* Overall assessment Card with Radial Dial */}
-          <section className="setup-main-card">
-            <div className="card-inner-padding">
-              <h2 className="setup-section-title">Overall assessment</h2>
-              
-              <div className="radial-dial-container mt-16 font-sans">
-                {/* Radial Gauge SVG */}
-                <div className="radial-gauge-wrapper">
-                  <svg className="radial-gauge" width="100" height="100" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="42" stroke="#F1F5F9" strokeWidth="8" fill="transparent" />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="42"
-                      stroke="#10B981"
-                      strokeWidth="8"
-                      fill="transparent"
-                      strokeDasharray="263.89"
-                      strokeDashoffset={263.89 - (263.89 * 0.82)}
-                      strokeLinecap="round"
-                      transform="rotate(-90 50 50)"
-                    />
-                  </svg>
-                  <div className="radial-score font-sans">
-                    <span className="score-val">82</span>
-                    <span className="score-total">/100</span>
-                  </div>
-                </div>
-                
-                <span className="status-badge-custom bg-emerald-light text-emerald mt-12">
-                  <span className="status-badge-dot bg-emerald" />
-                  High confidence
-                </span>
-              </div>
+          <div className="ledger-receipt">
+            <div className="receipt-row">
+              <span className="label">Initial Funding</span>
+              <span className="value font-mono">{formatXlm(invoice.budgetXlm)}</span>
             </div>
-          </section>
-
-          {/* Mission Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <h2 className="setup-section-title">Mission</h2>
-              <p className="report-sidebar-quest mt-8 font-sans">
-                What sustainability project should a rural Indonesian school prioritize: rooftop solar, smart irrigation, or rainwater harvesting?
-              </p>
+            <div className="receipt-row">
+              <span className="label">Total Paid to Agents</span>
+              <span className="value font-mono text-dark">{formatXlm(invoice.spentXlm)}</span>
             </div>
-          </section>
-
-          {/* Top Recommendation list */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <h2 className="setup-section-title">Top recommendation</h2>
-              
-              <div className="rec-rank-list font-sans mt-12">
-                <div className="rank-item">
-                  <div className="rank-num">1</div>
-                  <span className="rank-label">Rainwater harvesting</span>
-                  <strong className="rank-score font-mono">9.1/10</strong>
-                </div>
-                <div className="rank-item">
-                  <div className="rank-num">2</div>
-                  <span className="rank-label">Smart irrigation</span>
-                  <strong className="rank-score font-mono">8.4/10</strong>
-                </div>
-                <div className="rank-item">
-                  <div className="rank-num font-grey">3</div>
-                  <span className="rank-label text-muted-custom">Rooftop solar</span>
-                  <strong className="rank-score text-muted-custom font-mono">7.2/10</strong>
-                </div>
-              </div>
-
-              <button className="btn-link-action font-sans mt-16 btn-full">
-                View full analysis
-                <ArrowRight size={14} />
-              </button>
+            <div className="receipt-divider" />
+            <div className="receipt-row highlight">
+              <span className="label">Remaining (Refundable)</span>
+              <span className="value font-mono">{formatXlm(invoice.refundedXlm)}</span>
             </div>
-          </section>
-
-          {/* Budget progress Card */}
-          <section className="setup-main-card mt-24">
-            <div className="card-inner-padding">
-              <h2 className="setup-section-title">Budget summary</h2>
-              
-              <div className="sidebar-budget-breakdown font-sans mt-12">
-                <div className="sidebar-budget-row">
-                  <span>Total budget</span>
-                  <strong className="font-mono">100 XLM</strong>
-                </div>
-                <div className="sidebar-budget-row mt-8">
-                  <span>Spent to date</span>
-                  <strong className="font-mono text-dark">98.7 XLM</strong>
-                </div>
-
-                <div className="sidebar-budget-progress mt-12">
-                  <div className="progress-fill-indigo" style={{ width: "98.7%" }} />
-                </div>
-                <div className="sidebar-budget-pct-row font-mono mt-4">
-                  <span className="pct">98.7%</span>
-                </div>
-
-                <p className="sidebar-budget-footer font-sans mt-12">Unspent funds will be returned.</p>
-              </div>
-            </div>
-          </section>
+          </div>
+          
+          <div className="receipt-footer">
+            <CheckCircle size={12} className="text-emerald" />
+            <span>Audit trail permanently recorded on Stellar Testnet</span>
+          </div>
         </div>
+
       </div>
     </div>
   );

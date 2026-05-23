@@ -172,9 +172,13 @@ function runVerifier(state: MissionState): MissionState {
 
   return recalculate({
     ...state,
+    phase: "finalized",
     evidence,
     agents: state.agents.map((agent) => {
       if (agent.id === "verifier") {
+        return { ...agent, status: "verified" };
+      }
+      if (agent.id === "writer") {
         return { ...agent, status: "verified" };
       }
       if (paidAgentIds.has(agent.id)) {
@@ -191,9 +195,9 @@ function runVerifier(state: MissionState): MissionState {
       pendingIntentIds: evidence
         .filter((card) => card.status === "paid")
         .map((card) => `${card.id}:${card.agentId}:${card.proposedRewardXlm}:${state.ledger.contractId || "mock"}`),
-      message: `${invoice.spentXlm} XLM released for accepted evidence.`
+      message: `${invoice.spentXlm} XLM released for accepted evidence; final report URI recorded.`
     },
-    eventLog: prependLog(state, "Verifier sweep complete. Accepted artifacts were paid, weak claims were rejected.")
+    eventLog: prependLog(state, "Verifier sweep complete. Accepted artifacts were paid, weak claims were rejected, and the final report unlocked.")
   });
 }
 

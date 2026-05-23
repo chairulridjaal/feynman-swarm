@@ -49,10 +49,13 @@ export default function App() {
     maxStep = 6; // Unlocks both Step 5 (Invoice) and Step 6 (Memo)
   }
 
-  // Automatically lead the user to the active screen as phase updates
+  // Automatically lead the user to the active screen as phase updates.
+  // Stay on funding after escrow is funded so the user can explicitly start the swarm.
   useEffect(() => {
     if (state.phase === "finalized") {
       setActiveStep(5); // Transition first to research invoice payouts
+    } else if (state.phase === "funded") {
+      setActiveStep(2);
     } else {
       setActiveStep(maxStep);
     }
@@ -135,6 +138,7 @@ export default function App() {
               wallet={state.wallet}
               ledger={state.ledger}
               phase={state.phase}
+              question={state.question}
               budgetXlm={state.budgetXlm}
               onConnectWallet={handleConnectWallet}
               onDemoWallet={() => dispatch({ type: "set_wallet", wallet: getDemoWallet() })}
@@ -148,6 +152,7 @@ export default function App() {
               agents={state.agents}
               evidence={state.evidence}
               phase={state.phase}
+              budgetXlm={state.budgetXlm}
             />
           )}
 
@@ -190,6 +195,7 @@ export default function App() {
               {reportTab === "sandbox" ? (
                 <FinalReport
                   report={state.report}
+                  invoice={state.invoice}
                   phase={state.phase}
                   onFinalize={() => dispatch({ type: "finalize_report" })}
                 />

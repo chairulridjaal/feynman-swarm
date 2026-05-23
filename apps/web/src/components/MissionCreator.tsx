@@ -1,4 +1,4 @@
-import { Sparkles, HelpCircle } from "lucide-react";
+import { Sparkles, Activity, ShieldCheck, Database } from "lucide-react";
 import type { MissionState } from "../types";
 
 interface MissionCreatorProps {
@@ -21,115 +21,93 @@ export function MissionCreator({
   const canCreate = state.question.trim().length > 12 && state.budgetXlm > 0;
 
   return (
-    <div className="mission-setup-workspace fade-in">
-      <div className="setup-title-block">
-        <h1>Create research mission</h1>
-        <p className="setup-subtitle">
-          Define a research question, set your funding budget, and spawn a swarm of verification agents.
+    <div className="focused-wizard-container fade-in">
+      <div className="wizard-hero-block">
+        <h1 className="wizard-title">What do you want to investigate?</h1>
+        <p className="wizard-subtitle">
+          Define your question. Our verified agents will synthesize papers, repositories, and web data into a cited report.
         </p>
       </div>
 
-      <div className="setup-columns-grid">
-        {/* Left Creator Column */}
-        <section className="setup-main-card">
-          <div className="card-inner-padding">
-            <h2 className="setup-section-title">Mission Parameters</h2>
+      <div className="wizard-card-center">
+        <div className="wizard-input-hero">
+          <textarea
+            className="hero-textarea"
+            value={state.question}
+            onChange={(e) => onQuestionChange(e.target.value)}
+            placeholder="e.g. Compare the efficiency of rooftop solar vs. rainwater harvesting in rural communities..."
+            rows={3}
+            aria-label="Research question"
+          />
+        </div>
 
-            <div className="setup-fields-stack">
-              <label className="setup-field">
-                <span className="setup-field-label">Research Question</span>
-                <textarea
-                  value={state.question}
-                  onChange={(e) => onQuestionChange(e.target.value)}
-                  placeholder="e.g. What sustainability project should a rural Indonesian school prioritize: rooftop solar, smart irrigation, or rainwater harvesting?"
-                  rows={4}
-                  aria-label="Research question"
-                />
-              </label>
-
-              <div className="setup-form-row">
-                <label className="setup-field">
-                  <span className="setup-field-label">Funding Budget (XLM)</span>
-                  <div className="input-with-tag">
-                    <input
-                      type="number"
-                      min="10"
-                      step="5"
-                      value={state.budgetXlm}
-                      onChange={(e) => onBudgetChange(Number(e.target.value))}
-                    />
-                    <span className="input-tag font-mono">XLM</span>
-                  </div>
-                </label>
-
-                <label className="setup-field">
-                  <span className="setup-field-label">Research Depth</span>
-                  <select
-                    value={state.depth}
-                    onChange={(e) => onDepthChange(e.target.value as MissionState["depth"])}
-                  >
-                    <option value="rapid">Rapid Scan</option>
-                    <option value="standard">Standard Swarm</option>
-                    <option value="deep">Deep Review</option>
-                  </select>
-                </label>
-
-                <label className="setup-field">
-                  <span className="setup-field-label">Expected Output</span>
-                  <select
-                    value={state.outputType}
-                    onChange={(e) => onOutputTypeChange(e.target.value as MissionState["outputType"])}
-                  >
-                    <option value="brief">Decision Brief</option>
-                    <option value="technical">Technical Memo</option>
-                    <option value="board">Board Report</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-
-            <button
-              className="btn-primary-mockup btn-full mt-24"
-              onClick={onCreateMission}
-              disabled={!canCreate}
-            >
-              <Sparkles size={16} />
-              Create Mission Contract
-            </button>
-          </div>
-        </section>
-
-        {/* Right Info Column */}
-        <aside className="setup-sidebar-stack">
-          <div className="setup-info-card">
-            <h3 className="info-card-title">Research Guarantee</h3>
-            <div className="info-card-body">
-              <div className="info-bullet">
-                <div className="info-bullet-dot" />
-                <p>
-                  <strong>Freighter Sandbox Wallet</strong> holds funds securely in Soroban escrow.
-                </p>
-              </div>
-              <div className="info-bullet">
-                <div className="info-bullet-dot" />
-                <p>
-                  <strong>Verifier Agent</strong> audits academic, web, and repo sources before releasing rewards.
-                </p>
-              </div>
-              <div className="info-bullet">
-                <div className="info-bullet-dot" />
-                <p>
-                  <strong>Unused budget</strong> returns directly to your wallet upon final memo completion.
-                </p>
-              </div>
+        <div className="wizard-parameters-row">
+          <div className="param-item">
+            <span className="param-label">Funding (XLM)</span>
+            <div className="param-input-box">
+              <input
+                type="number"
+                min="10"
+                step="5"
+                value={state.budgetXlm}
+                onChange={(e) => onBudgetChange(Number(e.target.value))}
+              />
             </div>
           </div>
 
-          <div className="setup-help-box font-mono">
-            <HelpCircle size={14} className="icon-text" />
-            <span>Stellar Testnet ledger integration active.</span>
+          <div className="param-item">
+            <span className="param-label">Depth</span>
+            <div className="param-select-box">
+              <Activity size={14} className="param-icon" />
+              <select
+                value={state.depth}
+                onChange={(e) => onDepthChange(e.target.value as MissionState["depth"])}
+              >
+                <option value="rapid">Rapid Scan</option>
+                <option value="standard">Standard Swarm</option>
+                <option value="deep">Deep Review</option>
+              </select>
+            </div>
           </div>
-        </aside>
+
+          <div className="param-item">
+            <span className="param-label">Output</span>
+            <div className="param-select-box">
+              <Database size={14} className="param-icon" />
+              <select
+                value={state.outputType}
+                onChange={(e) => onOutputTypeChange(e.target.value as MissionState["outputType"])}
+              >
+                <option value="brief">Decision Brief</option>
+                <option value="technical">Technical Memo</option>
+                <option value="board">Board Report</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="wizard-action-footer">
+          <button
+            className="btn-wizard-primary"
+            onClick={onCreateMission}
+            disabled={!canCreate}
+          >
+            <Sparkles size={18} />
+            Initialize Swarm Mission
+          </button>
+        </div>
+      </div>
+
+      <div className="wizard-trust-badges">
+        <div className="trust-badge">
+          <ShieldCheck size={14} className="trust-icon text-emerald" />
+          <span>Soroban Escrow</span>
+        </div>
+        <div className="trust-badge-divider" />
+        <div className="trust-badge">
+          <Activity size={14} className="trust-icon text-blue" />
+          <span>Verifiable Citations</span>
+        </div>
       </div>
     </div>
   );

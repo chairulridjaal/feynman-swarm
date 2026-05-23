@@ -12,6 +12,11 @@ interface LiveAiPanelProps {
 
 export function LiveAiPanel({ state, liveAi, isLoading, error, onRun }: LiveAiPanelProps) {
   const canRun = state.phase !== "draft";
+  const friendlyError = error
+    ? error.includes("no_accounts") || error.includes("503")
+      ? "Live AI provider is temporarily degraded. The deterministic verified report remains active, and you can retry this pass when LB has an upstream account available."
+      : error
+    : "";
 
   return (
     <section className="live-ai-panel" aria-labelledby="live-ai-title">
@@ -33,7 +38,7 @@ export function LiveAiPanel({ state, liveAi, isLoading, error, onRun }: LiveAiPa
         {isLoading ? "Running live research" : "Run Live AI Pass"}
       </button>
 
-      {error && <div className="live-ai-error font-mono">{error}</div>}
+      {friendlyError && <div className="live-ai-error">{friendlyError}</div>}
 
       {liveAi && (
         <div className="live-ai-result">
